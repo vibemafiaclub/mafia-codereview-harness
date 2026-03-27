@@ -1,0 +1,65 @@
+- id: ADR-001
+  title: API 응답 형식 통일
+  status: adopted
+  date: 2026-01-15
+  stacks: [nest, next]
+  context: |
+    프론트엔드 3개 클라이언트(웹, 모바일웹, 어드민)가 각각 다른 API 응답 형식을 파싱하고 있었다.
+    신규 API를 추가할 때마다 클라이언트별 파싱 로직을 별도로 작성해야 했고,
+    에러 응답 형식도 엔드포인트마다 달라서 공통 에러 핸들링이 불가능했다.
+    특히 페이지네이션 메타데이터 위치가 API마다 달라 프론트엔드 개발 속도가 크게 저하되었다.
+  decision: 모든 API 응답은 { data, error, meta } 구조를 따른다.
+  consequence: 기존 v1 API도 점진적으로 마이그레이션. 신규 API는 반드시 이 형식을 따른다.
+
+- id: ADR-002
+  title: 인증/인가 미들웨어 분리
+  status: adopted
+  date: 2026-01-22
+  stacks: [nest]
+  context: |
+    기존 AuthGuard 하나가 JWT 검증(인증)과 역할 확인(인가)을 모두 처리하고 있었다.
+    관리자 전용 엔드포인트를 추가할 때 AuthGuard 내부 분기가 계속 늘어났고,
+    인가 정책만 변경해도 인증 로직까지 테스트해야 하는 상황이 반복되었다.
+    단위 테스트 작성 시 모킹 범위가 과도하게 넓어지는 문제도 있었다.
+  decision: AuthGuard(인증)와 RolesGuard(인가)를 분리한다. 인증은 JWT 검증만, 인가는 역할 기반 접근 제어만 담당.
+  consequence: Guard 단위 테스트가 가능해지고, 인가 정책 변경 시 인증 로직에 영향 없음.
+
+- id: ADR-003
+  title: 상태 관리 전략
+  status: adopted
+  date: 2026-02-03
+  stacks: [next]
+  context: |
+    전역 상태 스토어(Redux) 하나에 서버 데이터와 UI 상태가 혼재되어 있었다.
+    API 응답 캐싱, 재요청, 낙관적 업데이트를 모두 수동으로 관리하면서 보일러플레이트가 과도해졌다.
+    컴포넌트 A에서 서버 데이터를 업데이트하면 컴포넌트 B의 UI 상태까지 리렌더링되는 등
+    불필요한 의존성이 발생하여 성능 이슈와 디버깅 난이도가 증가했다.
+  decision: 서버 상태는 React Query, 클라이언트 상태는 Zustand로 분리.
+  consequence: prop drilling 3단계 이상이면 Zustand store 사용 검토.
+
+- id: ADR-004
+  title: DB 마이그레이션 전략
+  status: adopted
+  date: 2026-02-10
+  stacks: [nest]
+  context: |
+    개발자가 로컬에서 직접 SQL을 실행하여 스키마를 변경하는 경우가 빈번했다.
+    스테이징과 프로덕션 환경의 스키마가 로컬과 달라서 배포 시 에러가 발생하는 일이 반복되었다.
+    특히 컬럼 추가/삭제 순서가 환경마다 달라 ORM 매핑 오류가 간헐적으로 발생했고,
+    롤백 절차가 없어서 잘못된 마이그레이션을 되돌리는 데 수시간이 소요되었다.
+  decision: Prisma Migrate를 단일 마이그레이션 도구로 사용한다. 수동 SQL 직접 실행 금지.
+  consequence: prisma migrate dev로 개발, prisma migrate deploy로 배포. 마이그레이션 파일은 반드시 커밋.
+
+- id: ADR-005
+  title: 에러 처리 계층화
+  status: adopted
+  date: 2026-02-18
+  stacks: [nest, next]
+  context: |
+    각 서비스 레이어에서 에러를 자체적으로 catch하고 임의 형식으로 반환하고 있었다.
+    어떤 엔드포인트는 { message: "..." }를, 다른 엔드포인트는 { error: "...", code: 500 }을 반환했다.
+    프론트엔드에서 API 에러를 처리하려면 엔드포인트별로 에러 형식을 확인해야 했고,
+    토스트 메시지 출력 같은 공통 에러 UI를 만들 수 없었다.
+    장애 발생 시 로그에서 에러 타입을 구분하기도 어려웠다.
+  decision: NestJS Global Exception Filter에서 모든 에러를 { data: null, error: { code, message }, meta } 형식으로 변환. 도메인 에러는 커스텀 Exception 클래스로 정의.
+  consequence: 클라이언트는 단일 에러 형식만 처리하면 됨. 새 에러 타입 추가 시 Exception 클래스만 작성.

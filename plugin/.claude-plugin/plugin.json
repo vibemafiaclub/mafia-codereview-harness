@@ -1,0 +1,10 @@
+{
+  "name": "mafia-codereview",
+  "description": "Claude Code 기반 코드리뷰 자동화 파이프라인. 평가기준 자동 생성, 설계의도 문서화, 근거 기반 코드리뷰를 자동화합니다.",
+  "version": "0.1.0",
+  "author": {
+    "name": "vibemafiaclub"
+  },
+  "repository": "https://github.com/vibemafiaclub/mafia-codereview-harness",
+  "license": "MIT"
+}

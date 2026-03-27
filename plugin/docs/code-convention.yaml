@@ -1,0 +1,57 @@
+general:
+  - id: GEN-001
+    rule: 함수는 단일 책임 원칙을 따른다. 50줄을 넘으면 분리를 검토한다.
+    stacks: [all]
+  - id: GEN-002
+    rule: 매직 넘버를 사용하지 않는다. 상수로 선언한다.
+    stacks: [all]
+  - id: GEN-003
+    rule: 에러 핸들링은 발생 지점에서 처리한다. 호출자에게 무조건 위임하지 않는다.
+    stacks: [all]
+
+typescript:
+  - id: TS-001
+    rule: any 타입 사용을 금지한다. 불가피한 경우 unknown을 사용하고 타입 가드를 작성한다.
+    stacks: [typescript]
+  - id: TS-002
+    rule: 인터페이스 네이밍에 I 접두사를 사용하지 않는다.
+    stacks: [typescript]
+  - id: TS-003
+    rule: enum 대신 as const 객체를 사용한다.
+    stacks: [typescript]
+  - id: TS-004
+    rule: barrel export(index.ts)는 패키지 경계에서만 사용한다. 내부 모듈 간에는 직접 import한다.
+    stacks: [typescript]
+
+nextjs:
+  - id: NEXT-001
+    rule: 서버 컴포넌트를 기본으로 사용한다. 클라이언트 컴포넌트는 "use client" 경계를 최소화한다.
+    stacks: [next]
+  - id: NEXT-002
+    rule: API 호출은 서버 컴포넌트 또는 Server Action에서 수행한다. 클라이언트에서 직접 fetch하지 않는다.
+    stacks: [next]
+  - id: NEXT-003
+    rule: 페이지 컴포넌트에 비즈니스 로직을 넣지 않는다. 별도 함수/훅으로 분리한다.
+    stacks: [next]
+
+nestjs:
+  - id: NEST-001
+    rule: Controller는 요청/응답 변환만 담당한다. 비즈니스 로직은 Service에 둔다.
+    stacks: [nest]
+  - id: NEST-002
+    rule: DTO에 class-validator 데코레이터를 반드시 적용한다.
+    stacks: [nest]
+  - id: NEST-003
+    rule: 모든 외부 의존성은 모듈의 providers에 등록하고 DI를 통해 주입받는다. 직접 인스턴스를 생성하지 않는다.
+    stacks: [nest]
+
+monorepo:
+  - id: MONO-001
+    rule: 패키지 간 의존성은 workspace:* 프로토콜을 사용한다.
+    stacks: [pnpm, turborepo]
+  - id: MONO-002
+    rule: 공유 타입은 packages/types에, 공유 유틸은 packages/utils에 둔다.
+    stacks: [pnpm, turborepo]
+  - id: MONO-003
+    rule: turbo.json의 pipeline 캐시 설정을 변경할 때는 반드시 팀 리뷰를 거친다.
+    stacks: [turborepo]
