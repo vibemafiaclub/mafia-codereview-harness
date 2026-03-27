@@ -1,5 +1,7 @@
 # MAFIA Code-Review harness
 
+![flow.png](./assets/flow.png)
+
 Claude Code 기반 코드리뷰 자동화 파이프라인.
 
 > Git과 함께 사용할 때 가장 효과적입니다.
